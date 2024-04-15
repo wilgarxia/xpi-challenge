@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using PortfolioManager.Infrastructure.Persistence;
+using PortfolioManager.Infrastructure.Persistence.Commom;
 using PortfolioManager.Infrastructure.Security;
 
 namespace PortfolioManager.Infrastructure;

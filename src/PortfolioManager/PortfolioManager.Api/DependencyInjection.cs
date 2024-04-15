@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
 using PortfolioManager.Api.Identity;
-using PortfolioManager.Application;
 
 namespace PortfolioManager.Api;
 
@@ -32,11 +31,9 @@ public static class DependencyInjection
             ValidateIssuerSigningKey = true,
         });
 
-        services.AddAuthorization(options =>
-        {
-            options.AddPolicy(PolicyConfiguration.AdminUserPolicyName, p =>
+        services.AddAuthorizationBuilder()
+            .AddPolicy(PolicyConfiguration.AdminUserPolicyName, p =>
                 p.RequireClaim(PolicyConfiguration.AdminUserClaimName, "true"));
-        });
 
         return services;
     }

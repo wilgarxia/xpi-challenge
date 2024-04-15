@@ -1,17 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-using PortfolioManager.Domain;
+using PortfolioManager.Domain.UserAggregate;
 
-namespace PortfolioManager.Infrastructure.Persistence;
+namespace PortfolioManager.Infrastructure.Persistence.Commom;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        : base(options)
-    {
-
-    }
-
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder
         .UseNpgsql()
         .UseSnakeCaseNamingConvention();
