@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PortfolioManager.Application\PortfolioManager.Application.csproj" />
+    <ProjectReference Include="..\PortfolioManager.Infrastructure\PortfolioManager.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

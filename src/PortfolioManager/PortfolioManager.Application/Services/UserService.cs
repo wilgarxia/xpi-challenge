@@ -19,12 +19,10 @@ public class UserService(IUserRepository repository) : IUserService
         if (user is not null)
             return Result.Fail("User already exists");
 
-        user = new()
-        {
-            Username = request.Username,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-            IsAdmin = request.IsAdmin
-        };
+        if (User.Create(request.Username, request.Password, request.IsAdmin) is var res && res.IsFailed)
+            return res.ToResult<CreateUserResponse>();
+
+        user = res.Value;
 
         await repository.Add(user, cancellationToken);
         await repository.SaveChanges(cancellationToken);

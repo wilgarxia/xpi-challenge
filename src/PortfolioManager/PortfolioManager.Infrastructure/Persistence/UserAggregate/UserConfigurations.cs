@@ -17,5 +17,8 @@ public class UserConfigurations : IEntityTypeConfiguration<User>
         builder.Property(u => u.IsAdmin).IsRequired().HasDefaultValue(false);
 
         builder.HasIndex("Username").IsUnique();
+
+        builder.HasData(User.Create("admin", "123456", true).Value);
+        builder.HasData(User.Create("user1", "123456", false).Value);
     }
 }

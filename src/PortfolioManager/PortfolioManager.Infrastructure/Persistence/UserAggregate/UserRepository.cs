@@ -5,7 +5,7 @@ using PortfolioManager.Infrastructure.Persistence.Commom;
 
 namespace PortfolioManager.Infrastructure.Persistence.UserAggregate;
 
-public class UserRepository(ApplicationDbContext context) : IUserRepository
+public class UserRepository(AppDbContext context) : IUserRepository
 {
     public async Task<User?> GetByUsername(string username, CancellationToken cancellationToken)
     {

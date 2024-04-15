@@ -8,7 +8,7 @@ using PortfolioManager.Application.Services;
 namespace PortfolioManager.Api.Controllers;
 
 [Route("users")]
-//[Authorize(Policy = PolicyConfiguration.AdminUserPolicyName)]
+[Authorize(Policy = PolicyConfiguration.AdminUserPolicyName)]
 public class UsersController(IUserService userService) : ControllerBase
 {
     [HttpPost]
