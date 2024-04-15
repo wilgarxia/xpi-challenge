@@ -1,4 +1,4 @@
-﻿namespace PortfolioManager.Api;
+﻿namespace PortfolioManager.Domain;
 
 public class User
 {

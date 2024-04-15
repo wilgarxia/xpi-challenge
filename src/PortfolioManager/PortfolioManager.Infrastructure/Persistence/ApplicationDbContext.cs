@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace PortfolioManager.Api;
+using PortfolioManager.Domain;
+
+namespace PortfolioManager.Infrastructure.Persistence;
 
 public class ApplicationDbContext : DbContext
 {

@@ -8,7 +8,7 @@ namespace PortfolioManager.Api.Controllers;
 public class WeatherForecast : ControllerBase
 {
     [HttpGet]
-    [Authorize(Policy = IdentityData.AdminUserPolicyName)]
+    [Authorize(Policy = PolicyConfiguration.AdminUserPolicyName)]
     [Route("weatherforecast")]
     public IActionResult GetWeatherForecast()
     {
