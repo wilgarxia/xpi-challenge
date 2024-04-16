@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
 using PortfolioManager.Api.Extensions;
-using PortfolioManager.Api.Identity;
+using PortfolioManager.Infrastructure.Security.AuthorizationPolicies;
 
 namespace PortfolioManager.Api.Extensions;
 
@@ -46,8 +46,8 @@ public static class DependencyInjectionExtensions
     {
         services.AddAuthorizationBuilder()
             .AddPolicy(
-                PolicyConfiguration.AdminUserPolicyName,
-                p => p.RequireClaim(PolicyConfiguration.AdminUserClaimName, "true"));
+                AdminPolicyConfiguration.AdminUserPolicyName,
+                p => p.RequireClaim(AdminPolicyConfiguration.AdminUserClaimName, "true"));
 
         return services;
     }

@@ -1,14 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-using PortfolioManager.Api.Identity;
 using PortfolioManager.Application.Contracts;
 using PortfolioManager.Application.Services;
+using PortfolioManager.Infrastructure.Security.AuthorizationPolicies;
 
 namespace PortfolioManager.Api.Controllers;
 
 [Route("users")]
-[Authorize(Policy = PolicyConfiguration.AdminUserPolicyName)]
+[Authorize(Policy = AdminPolicyConfiguration.AdminUserPolicyName)]
 public class UsersController(IUserService userService) : ControllerBase
 {
     [HttpPost]
