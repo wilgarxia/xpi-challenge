@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
+using Npgsql;
+
 namespace PortfolioManager.Infrastructure.Persistence.Commom;
 
 public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
@@ -11,8 +13,16 @@ public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
             "Host=localhost;Port=5432;Database=mydb;Username=myuser;Password=mypass" :
             args[0];
 
-        var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-        optionsBuilder.UseNpgsql(connectionString).UseSnakeCaseNamingConvention();
+        NpgsqlDataSourceBuilder dataSourceBuilder = new(connectionString);
+
+        dataSourceBuilder.UseNodaTime();
+
+        NpgsqlDataSource dataSource = dataSourceBuilder.Build();
+        DbContextOptionsBuilder<AppDbContext> optionsBuilder = new();
+
+        optionsBuilder
+            .UseNpgsql(dataSource, n => n.UseNodaTime())
+            .UseSnakeCaseNamingConvention();
 
         return new AppDbContext(optionsBuilder.Options);
     }

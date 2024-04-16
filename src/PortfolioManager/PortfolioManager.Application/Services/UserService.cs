@@ -2,6 +2,7 @@
 
 using PortfolioManager.Application.Contracts;
 using PortfolioManager.Domain.UserAggregate;
+using PortfolioManager.Infrastructure.Security;
 
 namespace PortfolioManager.Application.Services;
 
@@ -10,7 +11,7 @@ public interface IUserService
     Task<Result<CreateUserResponse>> CreateUser(CreateUserRequest request, CancellationToken cancellationToken);
 }
 
-public class UserService(IUserRepository repository) : IUserService
+public class UserService(IUserRepository repository, IPasswordHashProvider hashProvider) : IUserService
 {
     public async Task<Result<CreateUserResponse>> CreateUser(CreateUserRequest request, CancellationToken cancellationToken)
     {
@@ -18,11 +19,12 @@ public class UserService(IUserRepository repository) : IUserService
 
         if (user is not null)
             return Result.Fail("User already exists");
+        
+        // TODO: Validation
 
-        if (User.Create(request.Username, request.Password, request.IsAdmin) is var res && res.IsFailed)
-            return res.ToResult<CreateUserResponse>();
-
-        user = res.Value;
+        string hashedPassword = hashProvider.HashPassword(request.Password);
+        
+        user = User.Create(request.Username, hashedPassword, request.IsAdmin);
 
         await repository.Add(user, cancellationToken);
         await repository.SaveChanges(cancellationToken);

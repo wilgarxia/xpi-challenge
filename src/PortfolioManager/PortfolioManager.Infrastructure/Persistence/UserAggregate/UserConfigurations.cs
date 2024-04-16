@@ -12,13 +12,14 @@ public class UserConfigurations : IEntityTypeConfiguration<User>
         builder.HasKey(u => u.Id);
 
         builder.Property(u => u.Id).ValueGeneratedNever();
+        builder.Property(u => u.CreatedAt).IsRequired();
         builder.Property(u => u.Username).IsRequired();
         builder.Property(u => u.PasswordHash).IsRequired();
         builder.Property(u => u.IsAdmin).IsRequired().HasDefaultValue(false);
 
         builder.HasIndex("Username").IsUnique();
 
-        builder.HasData(User.Create("admin", "123456", true).Value);
-        builder.HasData(User.Create("user1", "123456", false).Value);
+        builder.HasData(User.Create("admin", "123456", true));
+        builder.HasData(User.Create("user1", "123456", false));
     }
 }

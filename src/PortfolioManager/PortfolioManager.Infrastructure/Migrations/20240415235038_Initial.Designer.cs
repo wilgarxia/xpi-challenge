@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PortfolioManager.Infrastructure.Persistence.Commom;
 
@@ -12,8 +13,8 @@ using PortfolioManager.Infrastructure.Persistence.Commom;
 namespace PortfolioManager.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240415123103_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20240415235038_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -30,6 +31,10 @@ namespace PortfolioManager.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("id");
+
+                    b.Property<ZonedDateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<bool>("IsAdmin")
                         .ValueGeneratedOnAdd()
@@ -59,16 +64,18 @@ namespace PortfolioManager.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("1487690a-7737-40d0-b6f2-0d628bcea9a4"),
+                            Id = new Guid("02eb13a8-4d27-4eb4-89f6-7b7ee31c981c"),
+                            CreatedAt = new NodaTime.ZonedDateTime(NodaTime.Instant.FromUnixTimeTicks(17132250372819489L), NodaTime.TimeZones.TzdbDateTimeZoneSource.Default.ForId("UTC")),
                             IsAdmin = true,
-                            PasswordHash = "$2a$11$qj64ixqDcKLn7IzkznZApeXNSpZFW59Qs2AITPyWecaBZEazWIrrK",
+                            PasswordHash = "$2a$11$mss.4ov4tduZDhiOPAIs8OXWNSqxndvePKDlp6C3q4RbgxQw4U.tu",
                             Username = "admin"
                         },
                         new
                         {
-                            Id = new Guid("fc76a0bc-18d6-4d8b-99cc-1552412921fb"),
+                            Id = new Guid("29e7df09-7f8d-468f-9184-630d18f0bc6d"),
+                            CreatedAt = new NodaTime.ZonedDateTime(NodaTime.Instant.FromUnixTimeTicks(17132250375130368L), NodaTime.TimeZones.TzdbDateTimeZoneSource.Default.ForId("UTC")),
                             IsAdmin = false,
-                            PasswordHash = "$2a$11$T6bdoSz4f5bzBN6yWbXLuu91m2vvhnAGoYmcQXc3i55plFgDLWn66",
+                            PasswordHash = "$2a$11$O0hM54kXoX3soYPh2neUUezHdjAWrdj1jFx8eFOSeKcLbo0BGFub6",
                             Username = "user1"
                         });
                 });
