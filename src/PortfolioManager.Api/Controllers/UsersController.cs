@@ -16,5 +16,5 @@ public class UsersController(IUserService userService) : ControllerBase
         [FromBody] CreateUserRequest request, CancellationToken cancellationToken) =>
         await userService.CreateUser(request, cancellationToken) is var result && result.IsFailed
             ? BadRequest(result.Value)
-            : (IActionResult)Ok(result.Value);
+            : Ok(result.Value);
 }

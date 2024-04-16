@@ -6,6 +6,8 @@ using PortfolioManager.Infrastructure.Persistence;
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 
+builder.Services.AddControllers();
+
 builder.Services
     .AddPresentation(config)
     .AddApplication()

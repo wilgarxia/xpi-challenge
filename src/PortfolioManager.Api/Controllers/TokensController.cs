@@ -16,5 +16,5 @@ public class TokensController(ITokenService tokenService) : ControllerBase
         [FromBody] CreateTokenRequest request, CancellationToken cancellationToken) =>
         await tokenService.CreateToken(request, cancellationToken) is var result && result.IsFailed
             ? Unauthorized(result.Value)
-            : (IActionResult)Ok(result.Value);
+            : Ok(result.Value);
 }

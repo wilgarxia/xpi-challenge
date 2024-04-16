@@ -11,10 +11,17 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddPresentation(this IServiceCollection services, IConfiguration config)
     {
-        services.AddControllers();
-        services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen();
+        services
+            .AddEndpointsApiExplorer()
+            .AddSwaggerGen()
+            .AddAuthentication(config)
+            .AddAuthorization();
 
+        return services;
+    }
+
+    private static IServiceCollection AddAuthentication(this IServiceCollection services, IConfiguration config)
+    {
         services.AddAuthentication(x =>
         {
             x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -31,9 +38,15 @@ public static class DependencyInjection
             ValidateIssuerSigningKey = true,
         });
 
+        return services;
+    }
+
+    private static IServiceCollection AddAuthorization(this IServiceCollection services)
+    {
         services.AddAuthorizationBuilder()
-            .AddPolicy(PolicyConfiguration.AdminUserPolicyName, p =>
-                p.RequireClaim(PolicyConfiguration.AdminUserClaimName, "true"));
+            .AddPolicy(
+                PolicyConfiguration.AdminUserPolicyName, 
+                p => p.RequireClaim(PolicyConfiguration.AdminUserClaimName, "true"));
 
         return services;
     }
