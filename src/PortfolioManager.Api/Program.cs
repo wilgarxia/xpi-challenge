@@ -1,7 +1,6 @@
-using PortfolioManager.Api;
-using PortfolioManager.Application;
-using PortfolioManager.Infrastructure;
-using PortfolioManager.Infrastructure.Persistence;
+using PortfolioManager.Api.Extensions;
+using PortfolioManager.Application.Extensions;
+using PortfolioManager.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;

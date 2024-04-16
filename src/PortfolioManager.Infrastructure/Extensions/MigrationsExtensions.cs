@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using PortfolioManager.Infrastructure.Persistence.Commom;
 
-namespace PortfolioManager.Infrastructure.Persistence;
+namespace PortfolioManager.Infrastructure.Extensions;
 
 public static class MigrationsExtensions
 {

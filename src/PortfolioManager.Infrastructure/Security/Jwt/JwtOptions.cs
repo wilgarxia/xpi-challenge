@@ -1,4 +1,4 @@
-﻿namespace PortfolioManager.Infrastructure.Security;
+﻿namespace PortfolioManager.Infrastructure.Security.Jwt;
 
 public class JwtOptions
 {

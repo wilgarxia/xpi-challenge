@@ -5,7 +5,7 @@ using PortfolioManager.Domain.Common;
 using PortfolioManager.Domain.InvestmentAggregate;
 using PortfolioManager.Domain.UserAggregate;
 using PortfolioManager.Infrastructure.Persistence.Commom;
-using PortfolioManager.Infrastructure.Security;
+using PortfolioManager.Infrastructure.Security.CurrentUser;
 
 namespace PortfolioManager.Application.Services;
 

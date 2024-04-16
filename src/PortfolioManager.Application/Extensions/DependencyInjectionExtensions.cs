@@ -2,9 +2,9 @@
 
 using PortfolioManager.Application.Services;
 
-namespace PortfolioManager.Application;
+namespace PortfolioManager.Application.Extensions;
 
-public static class DependencyInjection
+public static class DependencyInjectionExtensions
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {

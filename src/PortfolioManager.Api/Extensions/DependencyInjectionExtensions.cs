@@ -3,11 +3,12 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
+using PortfolioManager.Api.Extensions;
 using PortfolioManager.Api.Identity;
 
-namespace PortfolioManager.Api;
+namespace PortfolioManager.Api.Extensions;
 
-public static class DependencyInjection
+public static class DependencyInjectionExtensions
 {
     public static IServiceCollection AddPresentation(this IServiceCollection services, IConfiguration config)
     {
@@ -45,7 +46,7 @@ public static class DependencyInjection
     {
         services.AddAuthorizationBuilder()
             .AddPolicy(
-                PolicyConfiguration.AdminUserPolicyName, 
+                PolicyConfiguration.AdminUserPolicyName,
                 p => p.RequireClaim(PolicyConfiguration.AdminUserClaimName, "true"));
 
         return services;

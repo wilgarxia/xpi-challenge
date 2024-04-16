@@ -2,7 +2,7 @@
 
 using PortfolioManager.Domain.UserAggregate;
 
-namespace PortfolioManager.Infrastructure.Security;
+namespace PortfolioManager.Infrastructure.Security.CurrentUser;
 
 public interface ICurrentUserProvider
 {

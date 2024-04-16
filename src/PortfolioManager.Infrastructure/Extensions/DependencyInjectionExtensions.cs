@@ -9,11 +9,13 @@ using PortfolioManager.Domain.UserAggregate;
 using PortfolioManager.Infrastructure.Persistence.Commom;
 using PortfolioManager.Infrastructure.Persistence.InvestmentAggregate;
 using PortfolioManager.Infrastructure.Persistence.UserAggregate;
-using PortfolioManager.Infrastructure.Security;
+using PortfolioManager.Infrastructure.Security.CurrentUser;
+using PortfolioManager.Infrastructure.Security.Jwt;
+using PortfolioManager.Infrastructure.Security.PasswordHash;
 
-namespace PortfolioManager.Infrastructure;
+namespace PortfolioManager.Infrastructure.Extensions;
 
-public static class DependencyInjection
+public static class DependencyInjectionExtensions
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration config)
     {
@@ -22,8 +24,8 @@ public static class DependencyInjection
             .AddPersistence(config)
             .AddCache(config)
             .AddSecurity(config)
-            .AddRepositories(config);
-        
+            .AddRepositories();
+
         return services;
     }
 
@@ -55,7 +57,7 @@ public static class DependencyInjection
         return services;
     }
 
-    public static IServiceCollection AddRepositories(this IServiceCollection services, IConfiguration config)
+    public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IInvestmentRepository, InvestmentRepository>();

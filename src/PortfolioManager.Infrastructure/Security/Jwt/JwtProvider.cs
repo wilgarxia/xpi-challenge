@@ -5,9 +5,9 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace PortfolioManager.Infrastructure.Security;
+namespace PortfolioManager.Infrastructure.Security.Jwt;
 
-public interface IJwtProvider 
+public interface IJwtProvider
 {
     string Generate(string userid, string username, bool isAdmin);
 }
@@ -15,7 +15,7 @@ public interface IJwtProvider
 public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
 {
     private static readonly TimeSpan TokenLifetime = TimeSpan.FromMinutes(30);
-    
+
     private readonly JwtOptions _options = options.Value;
 
     public string Generate(string userid, string username, bool isAdmin)

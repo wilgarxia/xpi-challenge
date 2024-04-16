@@ -2,7 +2,7 @@
 
 using PortfolioManager.Application.Contracts;
 using PortfolioManager.Domain.UserAggregate;
-using PortfolioManager.Infrastructure.Security;
+using PortfolioManager.Infrastructure.Security.PasswordHash;
 
 namespace PortfolioManager.Application.Services;
 
