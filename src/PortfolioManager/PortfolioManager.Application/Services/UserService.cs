@@ -21,10 +21,15 @@ public class UserService(IUserRepository repository, IPasswordHashProvider hashP
             return Result.Fail("User already exists");
         
         // TODO: Validation
-
-        string hashedPassword = hashProvider.HashPassword(request.Password);
         
-        user = User.Create(request.Username, hashedPassword, request.IsAdmin);
+        user = new User()
+        { 
+            Id = Guid.NewGuid(),
+            CreatedAt = DateTime.Now,
+            Username = request.Username,
+            PasswordHash = hashProvider.HashPassword(request.Password),
+            IsAdmin = request.IsAdmin
+        };
 
         await repository.Add(user, cancellationToken);
         await repository.SaveChanges(cancellationToken);

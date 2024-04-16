@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PortfolioManager.Infrastructure.Persistence.Commom;
 
@@ -13,8 +12,8 @@ using PortfolioManager.Infrastructure.Persistence.Commom;
 namespace PortfolioManager.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240415235038_Initial")]
-    partial class Initial
+    [Migration("20240416045440_AddUserEntity")]
+    partial class AddUserEntity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,8 +31,8 @@ namespace PortfolioManager.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<ZonedDateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp")
                         .HasColumnName("created_at");
 
                     b.Property<bool>("IsAdmin")
@@ -64,19 +63,19 @@ namespace PortfolioManager.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("02eb13a8-4d27-4eb4-89f6-7b7ee31c981c"),
-                            CreatedAt = new NodaTime.ZonedDateTime(NodaTime.Instant.FromUnixTimeTicks(17132250372819489L), NodaTime.TimeZones.TzdbDateTimeZoneSource.Default.ForId("UTC")),
+                            Id = new Guid("aacbda5a-2add-469e-85b9-d14dff2eb38b"),
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             IsAdmin = true,
-                            PasswordHash = "$2a$11$mss.4ov4tduZDhiOPAIs8OXWNSqxndvePKDlp6C3q4RbgxQw4U.tu",
+                            PasswordHash = "$2a$11$xfo0ikCN.paTU56KA3MR5ekr52..ps1wE2BiMPabUv2rnpQJSlyXK",
                             Username = "admin"
                         },
                         new
                         {
-                            Id = new Guid("29e7df09-7f8d-468f-9184-630d18f0bc6d"),
-                            CreatedAt = new NodaTime.ZonedDateTime(NodaTime.Instant.FromUnixTimeTicks(17132250375130368L), NodaTime.TimeZones.TzdbDateTimeZoneSource.Default.ForId("UTC")),
+                            Id = new Guid("0d706086-6829-45bc-ad95-b8b0d942aa84"),
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             IsAdmin = false,
-                            PasswordHash = "$2a$11$O0hM54kXoX3soYPh2neUUezHdjAWrdj1jFx8eFOSeKcLbo0BGFub6",
-                            Username = "user1"
+                            PasswordHash = "$2a$11$Ytj6xRsTIEVcvti/PhFeUOcpKZ3O53Yp.5e74xka0lXb3/FhJdvwu",
+                            Username = "my-user"
                         });
                 });
 #pragma warning restore 612, 618

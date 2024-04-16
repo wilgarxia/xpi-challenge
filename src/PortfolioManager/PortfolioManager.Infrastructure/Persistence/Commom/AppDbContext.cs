@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-using Npgsql;
-
+using PortfolioManager.Domain.InvestmentAggregate;
 using PortfolioManager.Domain.UserAggregate;
 
 namespace PortfolioManager.Infrastructure.Persistence.Commom;
@@ -15,5 +14,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         base.OnModelCreating(modelBuilder);
     }
 
-    public DbSet<User> User { get; set; }
+    public DbSet<User> Users { get; set; }
+    public DbSet<Investment> Investments { get; set; }
 }

@@ -16,18 +16,10 @@
         <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.2" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.2" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.2" />
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NodaTime" Version="8.0.2" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\PortfolioManager.Domain\PortfolioManager.Domain.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <EditorConfigFiles Remove="C:\Users\wil\source\repos\xpi-challenge\src\PortfolioManager\PortfolioManager.Infrastructure\Migrations\.editorconfig" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Include="C:\Users\wil\source\repos\xpi-challenge\src\PortfolioManager\PortfolioManager.Infrastructure\Migrations\.editorconfig" />
-    </ItemGroup>
 </Project>

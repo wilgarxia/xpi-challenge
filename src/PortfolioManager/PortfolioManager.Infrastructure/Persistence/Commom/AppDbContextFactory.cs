@@ -14,14 +14,11 @@ public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
             args[0];
 
         NpgsqlDataSourceBuilder dataSourceBuilder = new(connectionString);
-
-        dataSourceBuilder.UseNodaTime();
-
         NpgsqlDataSource dataSource = dataSourceBuilder.Build();
         DbContextOptionsBuilder<AppDbContext> optionsBuilder = new();
 
         optionsBuilder
-            .UseNpgsql(dataSource, n => n.UseNodaTime())
+            .UseNpgsql(dataSource)
             .UseSnakeCaseNamingConvention();
 
         return new AppDbContext(optionsBuilder.Options);
