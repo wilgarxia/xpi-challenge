@@ -24,6 +24,8 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(o => o.UseNpgsql(dataSource, n => n.UseNodaTime())
             .UseSnakeCaseNamingConvention());
 
+        services.AddStackExchangeRedisCache(o => o.Configuration = config.GetConnectionString("Cache"));
+
         services.AddOptions<JwtOptions>().Bind(config.GetSection("JwtSettings"));
         services.AddScoped<IJwtProvider, JwtProvider>();
         services.AddScoped<IPasswordHashProvider, PasswordHashProvider>();
