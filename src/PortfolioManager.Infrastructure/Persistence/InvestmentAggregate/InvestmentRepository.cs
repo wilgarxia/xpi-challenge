@@ -8,14 +8,14 @@ namespace PortfolioManager.Infrastructure.Persistence.InvestmentAggregate;
 
 internal class InvestmentRepository(AppDbContext context) : IInvestmentRepository
 {
-    public PaginatedList<Investment> GetPaginated(int pageIndex, int pageSize, bool available = true)
+    public IQueryable<Investment> GetQueryForPagination(bool available = true)
     {
         var query = context.Investments.AsQueryable();
 
         if (available)
             query = query.Where(x => x.IsAvailable == true);
 
-        return PaginatedList<Investment>.Create(query, pageIndex, pageSize);
+        return query;
     }
 
     public async Task<Investment?> GetAvailableById(Guid id, CancellationToken cancellationToken)

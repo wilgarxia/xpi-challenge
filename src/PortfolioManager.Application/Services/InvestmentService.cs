@@ -4,7 +4,6 @@ using PortfolioManager.Application.Contracts;
 using PortfolioManager.Domain.Common;
 using PortfolioManager.Domain.InvestmentAggregate;
 using PortfolioManager.Domain.UserAggregate;
-using PortfolioManager.Infrastructure.Persistence.Commom;
 using PortfolioManager.Infrastructure.Security.CurrentUser;
 
 namespace PortfolioManager.Application.Services;
@@ -29,9 +28,10 @@ internal class InvestmentService(IInvestmentRepository repository, ICurrentUserP
         if (currentUser.IsAdmin)
             returnOnlyAvailable = false;
 
-        var investments = repository.GetPaginated(request.PageIndex, request.PageSize, returnOnlyAvailable);
+        var query = repository.GetQueryForPagination(returnOnlyAvailable);
+        var results = PaginatedList<Investment>.Create(query, request.PageIndex, request.PageSize);
 
-        return Result.Ok(investments);
+        return Result.Ok(results);
     }
 
     public async Task<Result<Investment?>> GetById(Guid id, CancellationToken cancellationToken)

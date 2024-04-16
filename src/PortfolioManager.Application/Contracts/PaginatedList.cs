@@ -1,4 +1,4 @@
-﻿namespace PortfolioManager.Infrastructure.Persistence.Commom;
+﻿namespace PortfolioManager.Application.Contracts;
 
 public class PaginatedList<T>(List<T> items, int count, int pageIndex, int pageSize)
 {
