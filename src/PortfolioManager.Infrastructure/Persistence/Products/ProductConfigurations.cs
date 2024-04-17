@@ -1,28 +1,31 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-using PortfolioManager.Domain.InvestmentAggregate;
+using PortfolioManager.Domain.Products;
 
-namespace PortfolioManager.Infrastructure.Persistence.InvestmentAggregate;
+namespace PortfolioManager.Infrastructure.Persistence.Products;
 
-public class InvestmentConfigurations : IEntityTypeConfiguration<Investment>
+public class ProductConfigurations : IEntityTypeConfiguration<Product>
 {
-    public void Configure(EntityTypeBuilder<Investment> builder)
+    public void Configure(EntityTypeBuilder<Product> builder)
     {
-        builder.ToTable("investment");
+        builder.ToTable("product");
 
         builder.HasKey(i => i.Id);
 
         builder.Property(i => i.Id).ValueGeneratedNever();
+        builder.Property(i => i.CreatedAt).HasColumnType("timestamp");
+        builder.Property(i => i.Version).IsRowVersion();
+        builder.Property(i => i.UpdatedAt).HasColumnType("timestamp");
         builder.Property(i => i.MinimumInvestmentAmount).HasDefaultValue(0);
         builder.Property(i => i.MinimumInvestmentAmount).HasDefaultValue(0);
         builder.Property(i => i.IsAvailable).HasDefaultValue(true);
-        builder.Property(i => i.CreatedAt).HasColumnType("timestamp");
-        builder.Property(i => i.UpdatedAt).HasColumnType("timestamp");
         builder.Property(i => i.DueAt).HasColumnType("timestamp");
-        builder.HasOne(i => i.Manager).WithMany();
 
-        builder.HasData(new Investment()
+        builder.HasOne(x => x.Manager).WithMany(x => x.Products);
+        builder.HasMany(x => x.Users).WithMany(x => x.Products);
+
+        builder.HasData(new Product()
         {
             Id = Guid.Parse("8ba38709-9633-4a93-9824-d4ee22951c26"),
             CreatedAt = new DateTime(2024, 1, 1),
@@ -30,13 +33,11 @@ public class InvestmentConfigurations : IEntityTypeConfiguration<Investment>
             Description = "XP Debêntures Incentivadas Hedge CP FIC FIM LP",
             DueAt = new DateTime(2024, 1, 1).AddYears(5),
             IsAvailable = true,
-            UserId = Guid.Parse("aacbda5a-2add-469e-85b9-d14dff2eb38b"),
             MinimumInvestmentAmount = 1000,
-            Risk = Risk.Medium,
-            Type = InvestmentType.Bond
+            ManagerId = Guid.Parse("700b3357-29a6-437c-ba7e-e31abae30049")
         });
 
-        builder.HasData(new Investment()
+        builder.HasData(new Product()
         {
             Id = Guid.Parse("6610e835-8a46-45dd-8b3d-2e3a64eaec6a"),
             CreatedAt = new DateTime(2024, 1, 1),
@@ -44,10 +45,8 @@ public class InvestmentConfigurations : IEntityTypeConfiguration<Investment>
             Description = "XP BNP Multi Asset A.I. - Alta Alavancada",
             DueAt = new DateTime(2024, 1, 1).AddYears(5),
             IsAvailable = true,
-            UserId = Guid.Parse("aacbda5a-2add-469e-85b9-d14dff2eb38b"),
             MinimumInvestmentAmount = 5000,
-            Risk = Risk.High,
-            Type = InvestmentType.Fund
+            ManagerId = Guid.Parse("700b3357-29a6-437c-ba7e-e31abae30049")
         });
     }
 }

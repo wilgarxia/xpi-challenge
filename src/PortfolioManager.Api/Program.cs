@@ -1,3 +1,4 @@
+using PortfolioManager.Api.Common;
 using PortfolioManager.Api.Extensions;
 using PortfolioManager.Application.Extensions;
 using PortfolioManager.Infrastructure.Extensions;
@@ -12,8 +13,12 @@ builder.Services
     .AddApplication()
     .AddInfrastructure(config);
 
+builder.Services.AddExceptionHandler<ExceptionHandler>();
+
+
 var app = builder.Build();
 
+app.UseExceptionHandler();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseHttpsRedirection();
@@ -21,5 +26,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.ApplyMigrations();
+
 
 app.Run();

@@ -15,6 +15,7 @@ public static class DependencyInjectionExtensions
         services
             .AddEndpointsApiExplorer()
             .AddSwaggerGen()
+            .AddProblemDetails()
             .AddAuthentication(config)
             .AddAuthorization();
 
@@ -32,7 +33,7 @@ public static class DependencyInjectionExtensions
         {
             ValidIssuer = config["JwtSettings:Issuer"],
             ValidAudience = config["JwtSettings:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JwtSettings:Key"]!)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JwtSettings:Secret"]!)),
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,

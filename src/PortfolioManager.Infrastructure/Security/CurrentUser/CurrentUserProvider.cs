@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-using PortfolioManager.Domain.UserAggregate;
+using PortfolioManager.Domain.Users;
 
 namespace PortfolioManager.Infrastructure.Security.CurrentUser;
 
@@ -9,11 +9,23 @@ public interface ICurrentUserProvider
     Task<User?> GetCurrentUser(CancellationToken cancellationToken);
 }
 
-public class CurrentUserProvider(IHttpContextAccessor httpContextAccessor, IUserRepository userRepository) : ICurrentUserProvider
+public class CurrentUserProvider : ICurrentUserProvider
 {
+    private readonly IHttpContextAccessor _contextAccessor; 
+    private readonly IUserRepository _userRepository;
+
+    public CurrentUserProvider(IHttpContextAccessor contextAccessor, IUserRepository userRepository)
+    {
+        ArgumentNullException.ThrowIfNull(contextAccessor);
+        ArgumentNullException.ThrowIfNull(userRepository);
+
+        _contextAccessor = contextAccessor;
+        _userRepository = userRepository;
+    }
+
     public async Task<User?> GetCurrentUser(CancellationToken cancellationToken)
     {
-        var id = httpContextAccessor
+        var id = _contextAccessor
             .HttpContext!
             .User
             .Claims
@@ -23,7 +35,7 @@ public class CurrentUserProvider(IHttpContextAccessor httpContextAccessor, IUser
         if (!Guid.TryParse(id, out Guid userId))
             return null;
 
-        var user = await userRepository.GetById(userId, cancellationToken);
+        var user = await _userRepository.GetById(userId, cancellationToken);
 
         return user;
     }

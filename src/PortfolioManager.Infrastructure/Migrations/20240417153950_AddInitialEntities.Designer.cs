@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PortfolioManager.Infrastructure.Persistence.Commom;
@@ -11,9 +12,11 @@ using PortfolioManager.Infrastructure.Persistence.Commom;
 namespace PortfolioManager.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240417153950_AddInitialEntities")]
+    partial class AddInitialEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -148,55 +151,6 @@ namespace PortfolioManager.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("PortfolioManager.Domain.Transactions.Transaction", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric")
-                        .HasColumnName("amount");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("description");
-
-                    b.Property<int>("Direction")
-                        .HasColumnType("integer")
-                        .HasColumnName("direction");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("product_id");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.Property<uint>("Version")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("xid")
-                        .HasColumnName("xmin");
-
-                    b.HasKey("Id")
-                        .HasName("pk_transaction");
-
-                    b.HasIndex("ProductId")
-                        .HasDatabaseName("ix_transaction_product_id");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_transaction_user_id");
-
-                    b.ToTable("transaction", (string)null);
-                });
-
             modelBuilder.Entity("PortfolioManager.Domain.Users.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -302,27 +256,6 @@ namespace PortfolioManager.Infrastructure.Migrations
                         .HasConstraintName("fk_product_manager_manager_id");
 
                     b.Navigation("Manager");
-                });
-
-            modelBuilder.Entity("PortfolioManager.Domain.Transactions.Transaction", b =>
-                {
-                    b.HasOne("PortfolioManager.Domain.Products.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_transaction_product_product_id");
-
-                    b.HasOne("PortfolioManager.Domain.Users.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_transaction_users_user_id");
-
-                    b.Navigation("Product");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ProductUser", b =>
