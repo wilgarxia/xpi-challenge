@@ -25,6 +25,7 @@ services:
   postgres:
     image: postgres
     environment:
+      POSTGRES_DB: postgres
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypass
     ports:
