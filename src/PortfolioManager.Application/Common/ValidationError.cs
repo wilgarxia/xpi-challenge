@@ -6,8 +6,8 @@ public class ValidationError : Error
 {
     public ValidationError(string propertyName, string errorMessage) : base(errorMessage)
     {
-        this.Metadata["PropertyName"] = propertyName;
-        this.Metadata["ErrorMessage"] = errorMessage;
+        Metadata["PropertyName"] = propertyName;
+        Metadata["ErrorMessage"] = errorMessage;
     }
 
     public string? PropertyName => Metadata["PropertyName"] as string;

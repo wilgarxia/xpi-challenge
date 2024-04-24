@@ -1,40 +1,43 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-using PortfolioManager.Api.Extensions;
 using PortfolioManager.Application.Contracts;
-using PortfolioManager.Application.Services;
+using PortfolioManager.Application.Interfaces;
 using PortfolioManager.Infrastructure.Security.AuthorizationPolicies;
 
 namespace PortfolioManager.Api.Controllers;
 
 [Route("users")]
-public class UsersController : ControllerBase
+public class UsersController(
+    IUserService userService, 
+    IAuthenticationService tokenService,
+    IHttpContextAccessor context) : ApiController(context)
 {
-    private readonly IUserService _userService;
-    private readonly IAuthenticationService _tokenService;
-
-    public UsersController(IUserService userService, IAuthenticationService tokenService)
-    {
-        ArgumentNullException.ThrowIfNull(userService);
-        ArgumentNullException.ThrowIfNull(tokenService);
-
-        _userService = userService;
-        _tokenService = tokenService;
-    }
+    private readonly IUserService _userService = userService;
+    private readonly IAuthenticationService _tokenService = tokenService;
 
     [HttpPost]
     [Authorize(Policy = AdminPolicyConfiguration.AdminUserPolicyName)]
+    [ProducesResponseType(typeof(CreateUserResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> CreateUser(
-        [FromBody] CreateUserRequest request, CancellationToken cancellationToken) =>
-        await _userService.CreateUser(request, cancellationToken) is var result && result.IsFailed
-            ? BadRequest(result.ToProblem())
-            : Ok(result.Value);
+        [FromBody] CreateUserRequest request, CancellationToken cancellationToken)
+    {
+        var result = await _userService.CreateUser(request, cancellationToken);
+
+        return result.Match(x => Ok(x), Problem);
+    }
 
     [HttpPost("login")]
+    [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> LoginUser(
-        [FromBody] LoginRequest request, CancellationToken cancellationToken) =>
-        await _tokenService.Login(request, cancellationToken) is var result && result.IsFailed
-            ? BadRequest(result.ToProblem())
-            : Ok(result.Value);
+        [FromBody] LoginRequest request, CancellationToken cancellationToken)
+    {
+        var result = await _tokenService.Login(request, cancellationToken);
+
+        return result.Match(x => Ok(x), Problem);
+    }
 }

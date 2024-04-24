@@ -2,7 +2,14 @@
 
 public abstract class Entity
 {
-    public Guid Id { get; init; }
+    protected Entity(Guid id)
+    {
+        Id = id;
+    }
+
+    protected Entity() { }
+
+    public Guid Id { get; private init; }
     public DateTime CreatedAt { get; init; }
     public uint Version { get; init; }
 }

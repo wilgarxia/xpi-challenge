@@ -3,6 +3,7 @@
 using Microsoft.Extensions.DependencyInjection;
 
 using PortfolioManager.Application.Contracts;
+using PortfolioManager.Application.Interfaces;
 using PortfolioManager.Application.Services;
 
 namespace PortfolioManager.Application.Extensions;
@@ -23,6 +24,7 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IProductsService, ProductsService>();
+        services.AddScoped<IPortfolioService, PortfolioService>();
 
         return services;
     }

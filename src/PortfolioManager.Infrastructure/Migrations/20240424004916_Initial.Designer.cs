@@ -12,8 +12,8 @@ using PortfolioManager.Infrastructure.Persistence.Commom;
 namespace PortfolioManager.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240417163654_Transaction")]
-    partial class Transaction
+    [Migration("20240424004916_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,54 +25,6 @@ namespace PortfolioManager.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("PortfolioManager.Domain.Products.Manager", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("email");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("first_name");
-
-                    b.Property<string>("Lastname")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("lastname");
-
-                    b.Property<uint>("Version")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("xid")
-                        .HasColumnName("xmin");
-
-                    b.HasKey("Id")
-                        .HasName("pk_manager");
-
-                    b.ToTable("manager", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("700b3357-29a6-437c-ba7e-e31abae30049"),
-                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Email = "gandalf@gmail.com",
-                            FirstName = "Gandalf",
-                            Lastname = "The Grey",
-                            Version = 0u
-                        });
-                });
-
             modelBuilder.Entity("PortfolioManager.Domain.Products.Product", b =>
                 {
                     b.Property<Guid>("Id")
@@ -80,7 +32,7 @@ namespace PortfolioManager.Infrastructure.Migrations
                         .HasColumnName("id");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("created_at");
 
                     b.Property<string>("Description")
@@ -89,7 +41,7 @@ namespace PortfolioManager.Infrastructure.Migrations
                         .HasColumnName("description");
 
                     b.Property<DateTime>("DueAt")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("due_at");
 
                     b.Property<bool>("IsAvailable")
@@ -98,9 +50,10 @@ namespace PortfolioManager.Infrastructure.Migrations
                         .HasDefaultValue(true)
                         .HasColumnName("is_available");
 
-                    b.Property<Guid>("ManagerId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("manager_id");
+                    b.Property<string>("ManagerEmail")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("manager_email");
 
                     b.Property<decimal>("MinimumInvestmentAmount")
                         .ValueGeneratedOnAdd()
@@ -109,7 +62,7 @@ namespace PortfolioManager.Infrastructure.Migrations
                         .HasColumnName("minimum_investment_amount");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("updated_at");
 
                     b.Property<uint>("Version")
@@ -121,37 +74,34 @@ namespace PortfolioManager.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("pk_product");
 
-                    b.HasIndex("ManagerId")
-                        .HasDatabaseName("ix_product_manager_id");
-
                     b.ToTable("product", (string)null);
 
                     b.HasData(
                         new
                         {
                             Id = new Guid("8ba38709-9633-4a93-9824-d4ee22951c26"),
-                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2024, 1, 1, 3, 0, 0, 0, DateTimeKind.Utc),
                             Description = "XP Debêntures Incentivadas Hedge CP FIC FIM LP",
-                            DueAt = new DateTime(2029, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DueAt = new DateTime(2029, 1, 1, 3, 0, 0, 0, DateTimeKind.Utc),
                             IsAvailable = true,
-                            ManagerId = new Guid("700b3357-29a6-437c-ba7e-e31abae30049"),
+                            ManagerEmail = "manager@mail.com",
                             MinimumInvestmentAmount = 1000m,
                             Version = 0u
                         },
                         new
                         {
                             Id = new Guid("6610e835-8a46-45dd-8b3d-2e3a64eaec6a"),
-                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2024, 1, 1, 3, 0, 0, 0, DateTimeKind.Utc),
                             Description = "XP BNP Multi Asset A.I. - Alta Alavancada",
-                            DueAt = new DateTime(2029, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DueAt = new DateTime(2029, 1, 1, 3, 0, 0, 0, DateTimeKind.Utc),
                             IsAvailable = true,
-                            ManagerId = new Guid("700b3357-29a6-437c-ba7e-e31abae30049"),
+                            ManagerEmail = "manager@mail.com",
                             MinimumInvestmentAmount = 5000m,
                             Version = 0u
                         });
                 });
 
-            modelBuilder.Entity("PortfolioManager.Domain.Transactions.Transaction", b =>
+            modelBuilder.Entity("PortfolioManager.Domain.Users.PortfolioProduct", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
@@ -162,7 +112,51 @@ namespace PortfolioManager.Infrastructure.Migrations
                         .HasColumnName("amount");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("product_id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id")
+                        .HasName("pk_portfolio_product");
+
+                    b.HasIndex("ProductId")
+                        .HasDatabaseName("ix_portfolio_product_product_id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_portfolio_product_user_id");
+
+                    b.ToTable("portfolio_product", (string)null);
+                });
+
+            modelBuilder.Entity("PortfolioManager.Domain.Users.Transaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("amount");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("created_at");
 
                     b.Property<string>("Description")
@@ -207,7 +201,7 @@ namespace PortfolioManager.Infrastructure.Migrations
                         .HasColumnName("id");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("created_at");
 
                     b.Property<string>("Email")
@@ -255,59 +249,60 @@ namespace PortfolioManager.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("aacbda5a-2add-469e-85b9-d14dff2eb38b"),
-                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Email = "tom.bombadil@mail.com",
-                            FirstName = "Tom",
+                            CreatedAt = new DateTime(2024, 1, 1, 3, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "john@example.com",
+                            FirstName = "John",
                             IsAdmin = true,
-                            Lastname = "Bombadil",
-                            PasswordHash = "$2a$11$xfo0ikCN.paTU56KA3MR5ekr52..ps1wE2BiMPabUv2rnpQJSlyXK",
+                            Lastname = "Doe",
+                            PasswordHash = "$2a$11$DsHUOKHXnObgR5.HCla.oegHc5SlhyeIkryF5gF.xFhWlTsWKnko6",
                             Version = 0u
                         },
                         new
                         {
                             Id = new Guid("0d706086-6829-45bc-ad95-b8b0d942aa84"),
-                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Email = "frodo.baggins@mail.com",
-                            FirstName = "Frodo",
+                            CreatedAt = new DateTime(2024, 1, 1, 3, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "jane@example.com",
+                            FirstName = "Jane",
                             IsAdmin = false,
-                            Lastname = "Baggins",
-                            PasswordHash = "$2a$11$Ytj6xRsTIEVcvti/PhFeUOcpKZ3O53Yp.5e74xka0lXb3/FhJdvwu",
+                            Lastname = "Smith",
+                            PasswordHash = "$2a$11$K4Pyu70lbon4I4bL25lFRuQRQHhjmbU3sb5kKrBr1sPLIbjmKSo66",
+                            Version = 0u
+                        },
+                        new
+                        {
+                            Id = new Guid("8d4e4aa3-0bdf-44d3-ba6a-e3383eacebc7"),
+                            CreatedAt = new DateTime(2024, 1, 1, 3, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "alice@example.com",
+                            FirstName = "Alice",
+                            IsAdmin = true,
+                            Lastname = "Johnson",
+                            PasswordHash = "$2a$11$pZPzG980V7GoM2UNos3l9.onTf3trhSkwWT8gUshmcZfInY36NV8.",
                             Version = 0u
                         });
                 });
 
-            modelBuilder.Entity("ProductUser", b =>
+            modelBuilder.Entity("PortfolioManager.Domain.Users.PortfolioProduct", b =>
                 {
-                    b.Property<Guid>("ProductsId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("products_id");
-
-                    b.Property<Guid>("UsersId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("users_id");
-
-                    b.HasKey("ProductsId", "UsersId")
-                        .HasName("pk_product_user");
-
-                    b.HasIndex("UsersId")
-                        .HasDatabaseName("ix_product_user_users_id");
-
-                    b.ToTable("product_user", (string)null);
-                });
-
-            modelBuilder.Entity("PortfolioManager.Domain.Products.Product", b =>
-                {
-                    b.HasOne("PortfolioManager.Domain.Products.Manager", "Manager")
-                        .WithMany("Products")
-                        .HasForeignKey("ManagerId")
+                    b.HasOne("PortfolioManager.Domain.Products.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_product_manager_manager_id");
+                        .HasConstraintName("fk_portfolio_product_product_product_id");
 
-                    b.Navigation("Manager");
+                    b.HasOne("PortfolioManager.Domain.Users.User", "User")
+                        .WithMany("PortfolioProducts")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_portfolio_product_users_user_id");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("PortfolioManager.Domain.Transactions.Transaction", b =>
+            modelBuilder.Entity("PortfolioManager.Domain.Users.Transaction", b =>
                 {
                     b.HasOne("PortfolioManager.Domain.Products.Product", "Product")
                         .WithMany()
@@ -317,7 +312,7 @@ namespace PortfolioManager.Infrastructure.Migrations
                         .HasConstraintName("fk_transaction_product_product_id");
 
                     b.HasOne("PortfolioManager.Domain.Users.User", "User")
-                        .WithMany()
+                        .WithMany("Transactions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -328,26 +323,11 @@ namespace PortfolioManager.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ProductUser", b =>
+            modelBuilder.Entity("PortfolioManager.Domain.Users.User", b =>
                 {
-                    b.HasOne("PortfolioManager.Domain.Products.Product", null)
-                        .WithMany()
-                        .HasForeignKey("ProductsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_product_user_products_products_id");
+                    b.Navigation("PortfolioProducts");
 
-                    b.HasOne("PortfolioManager.Domain.Users.User", null)
-                        .WithMany()
-                        .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_product_user_users_users_id");
-                });
-
-            modelBuilder.Entity("PortfolioManager.Domain.Products.Manager", b =>
-                {
-                    b.Navigation("Products");
+                    b.Navigation("Transactions");
                 });
 #pragma warning restore 612, 618
         }
