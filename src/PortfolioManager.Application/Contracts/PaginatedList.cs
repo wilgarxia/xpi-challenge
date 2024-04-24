@@ -20,6 +20,14 @@ public class PaginatedList<T>(List<T> items, int count, int pageIndex, int pageS
         return new PaginatedList<T>(items, count, pageIndex, pageSize);
     }
 
+    public static PaginatedList<T> Create(List<T> source, int pageIndex, int pageSize)
+    {
+        var count = source.Count;
+        var items = source.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList();
+
+        return new PaginatedList<T>(items, count, pageIndex, pageSize);
+    }
+
     public static PaginatedList<TResult> CreateMapped<TResult>(
         IQueryable<T> source, int pageIndex, int pageSize, Expression<Func<T, TResult>> selector)
     {
@@ -27,7 +35,7 @@ public class PaginatedList<T>(List<T> items, int count, int pageIndex, int pageS
         var items = source.Select(selector)
                           .Skip((pageIndex - 1) * pageSize)
                           .Take(pageSize)
-                          .ToList(); 
+                          .ToList();
 
         return new PaginatedList<TResult>(items, count, pageIndex, pageSize);
     }

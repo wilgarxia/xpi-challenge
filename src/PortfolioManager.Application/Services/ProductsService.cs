@@ -1,42 +1,52 @@
-﻿using FluentResults;
+﻿using System.Text.Json;
+
+using ErrorOr;
+
+using FluentValidation;
+
+using Microsoft.Extensions.Caching.Distributed;
 
 using PortfolioManager.Application.Contracts;
+using PortfolioManager.Application.Interfaces;
 using PortfolioManager.Domain.Products;
+using PortfolioManager.Domain.Users;
+using PortfolioManager.Infrastructure.Common;
 using PortfolioManager.Infrastructure.Persistence.Commom;
+using PortfolioManager.Infrastructure.Security.CurrentUser;
 
 namespace PortfolioManager.Application.Services;
 
-public interface IProductsService
+internal class ProductsService(
+    AppDbContext context,
+    IProductRepository repository,
+    IDateTimeProvider dateTimeProvider,
+    ICurrentUserProvider currentUserProvider,
+    ITransactionRepository transactionRepository,
+    IValidator<CreateProductRequest> createValidator,
+    IValidator<UpdateProductRequest> updateValidator,
+    IDistributedCache cache) : IProductsService
 {
-    Result<PaginatedList<ProductResponse?>> GetAll(GetAllProductsRequest request);
-    Task<Result<Product?>> GetById(Guid id, CancellationToken cancellationToken);
-    Task<Result<ProductResponse?>> AddProduct(AddProductRequest request, CancellationToken cancellationToken);
-    Task<Result<ProductResponse?>> UpdateProduct(UpdateProductRequest request, CancellationToken cancellationToken);
-}
+    private readonly AppDbContext _context = context;
+    private readonly IProductRepository _productRepository = repository;
+    private readonly IDateTimeProvider  _dateTimeProvider = dateTimeProvider;
+    private readonly ICurrentUserProvider _currentUserProvider = currentUserProvider;
+    private readonly ITransactionRepository _transactionRepository = transactionRepository;
+    private readonly IValidator<CreateProductRequest> _createValidator = createValidator;
+    private readonly IValidator<UpdateProductRequest> _updateValidator = updateValidator;
+    private readonly IDistributedCache _cache = cache;
 
-internal class ProductsService : IProductsService
-{
-    private readonly AppDbContext _context;
-    private readonly IManagerRepository _managerRepository;
-    private readonly IProductRepository _productRepository;
-
-    public ProductsService(
-        AppDbContext context,
-        IManagerRepository managerRepository, 
-        IProductRepository repository/*, ICurrentUserProvider currentUserProvider*/)
+    public async Task<ErrorOr<PaginatedList<ProductResponse>>> GetAll(GetAllProductsRequest request, CancellationToken ct)
     {
-        ArgumentNullException.ThrowIfNull(context);
-        ArgumentNullException.ThrowIfNull(repository);
-        ArgumentNullException.ThrowIfNull(managerRepository);
-        //ArgumentNullException.ThrowIfNull(currentUserProvider);
-        _context = context;
-        _productRepository = repository;
-        _managerRepository = managerRepository;
-        //_currentUserProvider = currentUserProvider;
-    }
+        var cacheKey = $"products_{request.PageIndex}_{request.PageSize}";
+        var cachedData = await _cache.GetStringAsync(cacheKey, ct);
 
-    public Result<PaginatedList<ProductResponse?>> GetAll(GetAllProductsRequest request)
-    {
+        if (!string.IsNullOrEmpty(cachedData))
+        {
+            var cachedResults = JsonSerializer.Deserialize<List<ProductResponse>>(cachedData);
+
+            return PaginatedList<ProductResponse>.Create(cachedResults!, request.PageIndex, request.PageSize);
+        }
+
         var results = PaginatedList<Product>.CreateMapped(
             _productRepository.GetQueryForPagination(), 
             request.PageIndex, 
@@ -44,79 +54,203 @@ internal class ProductsService : IProductsService
             i => ToResponse(i) 
         );
 
-        return Result.Ok(results);
+        var serializedResults = JsonSerializer.Serialize(results.Items);
+
+        await _cache.SetStringAsync(cacheKey, serializedResults, new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
+        }, ct);
+
+        return results;
     }
 
-    public async Task<Result<Product?>> GetById(Guid id, CancellationToken cancellationToken) =>
-        Result.Ok(await _productRepository.GetById(id, cancellationToken));
-
-    public async Task<Result<ProductResponse?>> AddProduct(AddProductRequest request, CancellationToken cancellationToken)
+    public async Task<ErrorOr<ProductResponse>> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var manager = await _managerRepository.GetByFirstNameAndLastName(
-            request.Manager.FirstName, request.Manager.LastName, cancellationToken);
+        var cacheKey = $"product_{id}";
+        var cachedData = await _cache.GetStringAsync(cacheKey, cancellationToken);
 
-        if (manager is null)
+        if (!string.IsNullOrEmpty(cachedData))
         {
-            manager = Manager.Create(request.Manager.FirstName, request.Manager.LastName, request.Manager.Email);
+            var cachedProduct = JsonSerializer.Deserialize<ProductResponse>(cachedData);
 
-            await _managerRepository.Add(manager, cancellationToken);
+            if (cachedProduct != null)
+            {
+                return cachedProduct;
+            }
         }
 
-        var product = new Product
+        var product = await _productRepository.GetById(id, cancellationToken);
+
+        if (product is null)
+            return Error.NotFound(description: "Product not found.");
+
+        var productResponse = ToResponse(product);
+        var serializedProduct = JsonSerializer.Serialize(productResponse);
+        var cacheOptions = new DistributedCacheEntryOptions
         {
-            Description = request.Description,
-            DueAt = request.DueAt,
-            MinimumInvestmentAmount = request.MinimumInvestmentAmount,
-            IsAvailable = true,
-            Manager = manager
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10) 
         };
+        await _cache.SetStringAsync(cacheKey, serializedProduct, cacheOptions, cancellationToken);
+
+        return ToResponse(product);
+    }
+
+    public async Task<ErrorOr<ProductResponse>> CreateProduct(CreateProductRequest request, CancellationToken cancellationToken)
+    {
+        // TODO: Cache invalidation
+        if (await _createValidator.ValidateAsync(request, cancellationToken) is var validation && !validation.IsValid)
+            return validation.Errors.ConvertAll(error => Error.Validation(error.PropertyName, error.ErrorMessage));
+
+        if (await _productRepository.GetByDescription(request.Description, cancellationToken)
+                is var result && result is not null)
+            return ProductFailures.ProductAlreadyExists;
+
+        var product = Product.Create(
+            _dateTimeProvider.UtcNow, 
+            request.Description, 
+            request.DueAt.Date, 
+            request.MinimumInvestmentAmount, 
+            request.ManagerEmail);
 
         await _productRepository.Add(product, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
 
-        return Result.Ok(ToResponse(product));
+        return ToResponse(product);
     }
 
-    public async Task<Result<ProductResponse?>> UpdateProduct(UpdateProductRequest request, CancellationToken cancellationToken)
+    public async Task<ErrorOr<ProductResponse>> UpdateProduct(UpdateProductRequest request, CancellationToken cancellationToken)
     {
-        if (await _productRepository.GetById(request.Id, cancellationToken) is var product && product is null)
-            return Result.Ok();
+        // TODO: Cache invalidation
+        if (await _updateValidator.ValidateAsync(request, cancellationToken) is var validation && !validation.IsValid)
+            return validation.Errors.ConvertAll(error => Error.Validation(error.PropertyName, error.ErrorMessage));
 
-        product.Description = request.Description;
-        product.MinimumInvestmentAmount = request.MinimumInvestmentAmount;
+        if (await _productRepository.GetById(request.Id, cancellationToken) is var product && product is null)
+            return Error.NotFound(description: "Product not found.");
+
+        product.Update(_dateTimeProvider.UtcNow, request.Description, request.MinimumInvestmentAmount);
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return Result.Ok(ToResponse(product));
+        return ToResponse(product);
     }
 
-    private static ProductResponse? ToResponse(Product product) =>
-         new(product.Id,
-             product.CreatedAt,
-             product.UpdatedAt,
-             product.Description,
-             product.DueAt,
-             product.MinimumInvestmentAmount);
+    public async Task<ErrorOr<ProductResponse>> DeactivateProduct(Guid id, CancellationToken cancellationToken)
+    {
+        // TODO: Cache invalidation
+        if (await _productRepository.GetById(id, cancellationToken) is var product && product is null)
+            return Error.NotFound(description: "Product not found.");
 
-    //public async Task<Result<bool>> SoftDeleteInvestment(Guid id, CancellationToken cancellationToken)
-    //{
-    //    var currentUser = await _currentUserProvider.GetCurrentUser(cancellationToken);
-    //    if (currentUser is null)
-    //        return Result.Fail<bool>("User not found.");
+        if (!product.IsAvailable)
+            return ProductFailures.ProductUnavailable;
 
-    //    var investment = await _repository.GetById(id, cancellationToken);
-    //    if (investment == null)
-    //        return Result.Fail<bool>("Investment not found.");
+        product.Deactivate(_dateTimeProvider.UtcNow);
 
-    //    if (!currentUser.IsAdmin && investment.UserId != currentUser.Id)
-    //        return Result.Fail<bool>("Unauthorized access.");
+        await _context.SaveChangesAsync(cancellationToken);
 
-    //    investment.IsAvailable = false; // Soft delete by marking as not available
-    //    investment.UpdatedAt = DateTime.UtcNow; // Update the modified time
+        return ToResponse(product);
+    }
 
-    //    await _repository.Update(investment, cancellationToken);
-    //    await _repository.SaveChanges(cancellationToken);
+    public async Task<ErrorOr<TransactionResponse>> BuyProduct(BuyOrSellProductRequest request, CancellationToken cancellationToken)
+    {
+        var product = await _productRepository.GetById(request.ProductId, cancellationToken);
 
-    //    return Result.Ok(true);
-    //}
+        if (product is null)
+            return Error.NotFound(description: "Product not found.");
+
+        if (request.Amount < product.MinimumInvestmentAmount)
+            return ProductFailures.AmountLessThanMinimumRequired;
+
+        var user = await _currentUserProvider.GetCurrentUserWithPortfolio(cancellationToken);
+
+        if (user is null)
+            return Error.NotFound(description: "User not found.");
+
+        using var dbTransaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+
+        if (user.PortfolioProducts.Any(x => x.ProductId == request.ProductId))
+        {
+            var userProduct = user.PortfolioProducts
+                .Where(x => x.ProductId == request.ProductId)
+                .Single();
+
+            userProduct.Increase(_dateTimeProvider.UtcNow, request.Amount);
+        }
+        else
+            user.AddProductToPortfolio(_dateTimeProvider.UtcNow, product.Id, user.Id, request.Amount);
+
+        var transaction = Transaction.CreateDebitTransaction(
+            _dateTimeProvider.UtcNow,
+            $"Buy - {product.Description[..6]}",
+            request.Amount,
+            user.Id,
+            product.Id);
+
+        await _transactionRepository.Add(transaction, cancellationToken);
+        _ = await _context.SaveChangesAsync(cancellationToken);
+
+        await dbTransaction.CommitAsync(cancellationToken);
+
+        return ToResponse(transaction);
+    }
+
+    public async Task<ErrorOr<TransactionResponse>> SellProduct(BuyOrSellProductRequest request, CancellationToken cancellationToken)
+    {
+        var user = await _currentUserProvider.GetCurrentUserWithPortfolio(cancellationToken);
+
+        if (user is null)
+            return Error.NotFound(description: "User not found.");
+
+        if (!user.PortfolioProducts.Any(x => x.ProductId == request.ProductId))
+            return Error.NotFound(description: "Product not found.");
+
+        var userProduct = user.PortfolioProducts
+            .Where(x => x.ProductId == request.ProductId)
+            .Single();
+
+        if (userProduct.Amount < request.Amount)
+            return ProductFailures.AmountLessThanMinimumRequired;
+
+        if (await _productRepository.GetById(request.ProductId, cancellationToken) is var product && product is null)
+            return Error.NotFound(description: "Product not found.");
+
+        userProduct.Descrease(_dateTimeProvider.UtcNow, request.Amount);
+
+        var transaction = Transaction.CreateCreditTransaction(
+            _dateTimeProvider.UtcNow,
+            $"Buy - {product.Description[..6]}",
+            request.Amount,
+            user.Id,
+            product.Id);
+
+        await _transactionRepository.Add(transaction, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return ToResponse(transaction);
+    }
+
+    private static TransactionResponse ToResponse(Transaction transaction) =>
+        new()
+        {
+            Id = transaction.Id,
+            CreatedAt = transaction.CreatedAt,
+            Amount = transaction.Amount,
+            Operation = transaction.Direction switch
+            {
+                TransactionDirection.Debit => TransactionType.Buy,
+                TransactionDirection.Credit => TransactionType.Sell,
+                _ => throw new InvalidOperationException()
+            },
+            Product = new TransactionResponse.TransactionProduct()
+            {
+                Id = transaction.Product.Id,
+                Description = transaction.Product.Description
+            }
+        };
+
+    private static ProductResponse ToResponse(Product product) =>
+        new(product.Id,
+            product.CreatedAt,
+            product.UpdatedAt,
+            product.Description,
+            product.DueAt,
+            product.MinimumInvestmentAmount);
 }

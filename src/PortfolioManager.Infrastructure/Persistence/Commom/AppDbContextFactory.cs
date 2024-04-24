@@ -10,7 +10,7 @@ public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
     public AppDbContext CreateDbContext(string[] args)
     {
         string connectionString = args.Length < 1 ?
-            "Host=localhost;Port=5432;Database=mydb;Username=myuser;Password=mypass" :
+            "Host=localhost;Port=5432;Database=portfolio_manager;Username=postgres;Password=mysecretpassword" :
             args[0];
 
         NpgsqlDataSourceBuilder dataSourceBuilder = new(connectionString);

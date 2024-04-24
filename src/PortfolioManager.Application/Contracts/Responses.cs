@@ -9,3 +9,22 @@ public record ProductResponse(
     string Description,
     DateTime DueAt,
     decimal MinimumInvestmentAmount);
+
+public record PortfolioProductResponse(
+    ProductResponse Product,
+    decimal Amount);
+
+public class TransactionResponse
+{
+    public Guid Id { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public decimal Amount { get; set; }
+    public TransactionType Operation { get; set; }
+    public TransactionProduct Product { get; set; } = null!;
+
+    public class TransactionProduct
+    {
+        public Guid Id { get; set; }
+        public string Description { get; set; } = null!;
+    }
+}

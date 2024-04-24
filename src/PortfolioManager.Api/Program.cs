@@ -15,7 +15,6 @@ builder.Services
 
 builder.Services.AddExceptionHandler<ExceptionHandler>();
 
-
 var app = builder.Build();
 
 app.UseExceptionHandler();
@@ -26,6 +25,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.ApplyMigrations();
-
 
 app.Run();
